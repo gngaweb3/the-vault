@@ -2,20 +2,12 @@ const { ethers } = require("ethers");
 
 const MASTER  = "0x315A47b154AA253F5660eDe42b64b4acD8402280";
 const SUB_ETH = "0xb9448016187B4DB709d24cC01AbaDbF3C654E175";
-const SUB_POL = "0x7f61728427dEa4D188805275C6BcB607d005DFD0";
 const SUB_BNB = "0x9Fff9979A425AbD28c825406A64a31c524b7e403";
-const SUB_HYPE = "0x3f92214A1558E6b2d1734dFCD6DD105D37f454ab";
 
 const ETH_RPC  = "https://ethereum-rpc.publicnode.com";
 const POL_RPC  = "https://polygon-bor-rpc.publicnode.com";
 const BNB_RPC  = "https://bsc-rpc.publicnode.com";
 const HYPE_RPC = "https://rpc.hyperliquid.xyz/evm";
-
-// USDC contracts per network (6 decimales)
-const USDC_ETH  = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
-const USDC_POL  = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174";
-const USDC_BNB  = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
-const USDC_HYPE = "0xb88339CB7199b77E23DB6E890353E22632Ba630f";
 
 const ERC20_ABI = [
   "function balanceOf(address account) view returns (uint256)",
@@ -27,7 +19,7 @@ const VTOKEN_ABI = [
 ];
 
 async function main() {
-  const ids = "pax-gold,quant-network,chainlink,polygon-ecosystem-token,ripple,hyperliquid,usd-coin";
+  const ids = "pax-gold,quant-network,chainlink,polygon-ecosystem-token,staked-pol,ripple,hyperliquid";
   const prices = await fetch(
     "https://api.coingecko.com/api/v3/simple/price?ids=" + ids + "&vs_currencies=usd"
   ).then(r => r.json());
@@ -37,9 +29,9 @@ async function main() {
     qnt:  prices["quant-network"]?.usd || 0,
     link: prices["chainlink"]?.usd || 0,
     pol:  prices["polygon-ecosystem-token"]?.usd || 0,
+    spol: prices["staked-pol"]?.usd || 0,  // precio real de sPOL — diferente a POL
     xrp:  prices["ripple"]?.usd || 0,
     hype: prices["hyperliquid"]?.usd || 0,
-    usdc: 1, // USDC siempre $1
   };
 
   const ethProvider  = new ethers.providers.JsonRpcProvider(ETH_RPC);
@@ -54,24 +46,10 @@ async function main() {
   const stpolContract = new ethers.Contract("0x3B790d651e950497c7723D47B24E6f61534f7969", ERC20_ABI, ethProvider);
   const vxrpContract  = new ethers.Contract("0xB248a295732e0225acd3337607cc01068e3b9c10", VTOKEN_ABI, bnbProvider);
 
-  // USDC contracts — Master Vaults (una dirección MASTER, 4 redes)
-  const usdcEthMaster  = new ethers.Contract(USDC_ETH,  ERC20_ABI, ethProvider);
-  const usdcPolMaster  = new ethers.Contract(USDC_POL,  ERC20_ABI, polProvider);
-  const usdcBnbMaster  = new ethers.Contract(USDC_BNB,  ERC20_ABI, bnbProvider);
-  const usdcHypeMaster = new ethers.Contract(USDC_HYPE, ERC20_ABI, hypeProvider);
-
-  // USDC contracts — Sub-Vaults (4 sub-vaults, 4 redes)
-  const usdcEthSub  = new ethers.Contract(USDC_ETH,  ERC20_ABI, ethProvider);
-  const usdcPolSub  = new ethers.Contract(USDC_POL,  ERC20_ABI, polProvider);
-  const usdcBnbSub  = new ethers.Contract(USDC_BNB,  ERC20_ABI, bnbProvider);
-  const usdcHypeSub = new ethers.Contract(USDC_HYPE, ERC20_ABI, hypeProvider);
-
   const [
     paxgRaw, qntRaw, linkRaw, polRaw,
     wxrpRaw, hypeRaw, stpolRaw,
-    vxrpBalRaw, vxrpRateRaw,
-    usdcEthMasterRaw, usdcPolMasterRaw, usdcBnbMasterRaw, usdcHypeMasterRaw,
-    usdcEthSubRaw, usdcPolSubRaw, usdcBnbSubRaw, usdcHypeSubRaw,
+    vxrpBalRaw, vxrpRateRaw
   ] = await Promise.all([
     paxgContract.balanceOf(MASTER),
     qntContract.balanceOf(MASTER),
@@ -82,14 +60,6 @@ async function main() {
     stpolContract.balanceOf(SUB_ETH),
     vxrpContract.balanceOf(SUB_BNB),
     vxrpContract.exchangeRateStored(),
-    usdcEthMaster.balanceOf(MASTER),
-    usdcPolMaster.balanceOf(MASTER),
-    usdcBnbMaster.balanceOf(MASTER),
-    usdcHypeMaster.balanceOf(MASTER),
-    usdcEthSub.balanceOf(SUB_ETH),
-    usdcPolSub.balanceOf(SUB_POL),
-    usdcBnbSub.balanceOf(SUB_BNB),
-    usdcHypeSub.balanceOf(SUB_HYPE),
   ]);
 
   const paxg  = parseFloat(ethers.utils.formatUnits(paxgRaw,  18));
@@ -103,41 +73,22 @@ async function main() {
   const productoBN = vxrpBalRaw.mul(vxrpRateRaw);
   const vxrp = parseFloat(ethers.utils.formatUnits(productoBN, 36));
 
-  // USDC — Master Vaults (6 decimales)
-  const usdcMasterTotal =
-    parseFloat(ethers.utils.formatUnits(usdcEthMasterRaw,  6)) +
-    parseFloat(ethers.utils.formatUnits(usdcPolMasterRaw,  6)) +
-    parseFloat(ethers.utils.formatUnits(usdcBnbMasterRaw,  6)) +
-    parseFloat(ethers.utils.formatUnits(usdcHypeMasterRaw, 6));
-
-  // USDC — Sub-Vaults (6 decimales)
-  const usdcSubTotal =
-    parseFloat(ethers.utils.formatUnits(usdcEthSubRaw,  6)) +
-    parseFloat(ethers.utils.formatUnits(usdcPolSubRaw,  6)) +
-    parseFloat(ethers.utils.formatUnits(usdcBnbSubRaw,  6)) +
-    parseFloat(ethers.utils.formatUnits(usdcHypeSubRaw, 6));
-
-  // Base Assets = posiciones fijas (Master) + USDC Master Vaults
-  // Gas y Residual Assets NO se incluyen (igual que en el dashboard)
   const base_assets_usd =
     (paxg  * p.paxg) +
     (qnt   * p.qnt)  +
     (link  * p.link) +
     (pol   * p.pol)  +
     (wxrp  * p.xrp)  +
-    (hype  * p.hype) +
-    (usdcMasterTotal * p.usdc);
+    (hype  * p.hype);
 
-  // Yield = posiciones de rendimiento (Sub-Vaults) + USDC Sub-Vaults
   const yield_usd =
-    (stpol * p.pol) +
-    (vxrp  * p.xrp) +
-    (usdcSubTotal * p.usdc);
+    (stpol * p.spol) +
+    (vxrp  * p.xrp);
 
   const treasury_total_usd = base_assets_usd + yield_usd;
 
-  console.log("Base Assets USD:", base_assets_usd, "(incl. USDC Master:", usdcMasterTotal, ")");
-  console.log("Yield USD:", yield_usd, "(incl. USDC Sub-Vaults:", usdcSubTotal, ")");
+  console.log("Base Assets USD:", base_assets_usd);
+  console.log("Yield USD:", yield_usd);
   console.log("Total USD:", treasury_total_usd);
 
   const res = await fetch(process.env.SUPABASE_URL + "/rest/v1/treasury_snapshots", {
