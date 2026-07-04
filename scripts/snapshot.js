@@ -19,7 +19,7 @@ const VTOKEN_ABI = [
 ];
 
 async function main() {
-  const ids = "pax-gold,quant-network,chainlink,polygon-ecosystem-token,staked-pol,ripple,hyperliquid";
+  const ids = "pax-gold,quant-network,chainlink,polygon-ecosystem-token,spol,ripple,hyperliquid";
   const prices = await fetch(
     "https://api.coingecko.com/api/v3/simple/price?ids=" + ids + "&vs_currencies=usd"
   ).then(r => r.json());
@@ -29,7 +29,7 @@ async function main() {
     qnt:  prices["quant-network"]?.usd || 0,
     link: prices["chainlink"]?.usd || 0,
     pol:  prices["polygon-ecosystem-token"]?.usd || 0,
-    spol: prices["staked-pol"]?.usd || 0,  // precio real de sPOL — diferente a POL
+    spol: prices["spol"]?.usd || prices["polygon-ecosystem-token"]?.usd || 0, // sPOL precio real, fallback a POL
     xrp:  prices["ripple"]?.usd || 0,
     hype: prices["hyperliquid"]?.usd || 0,
   };
