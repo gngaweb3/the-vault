@@ -45,7 +45,7 @@ async function main() {
     qnt:  prices["quant-network"]?.usd || 0,
     link: prices["chainlink"]?.usd || 0,
     pol:  prices["polygon-ecosystem-token"]?.usd || 0,
-    spol: prices["spol"]?.usd || prices["polygon-ecosystem-token"]?.usd || 0,
+    spol: prices["spol"]?.usd || 0,
     xrp:  prices["ripple"]?.usd || 0,
     hype: prices["hyperliquid"]?.usd || 0,
   };
