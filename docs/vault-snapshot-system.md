@@ -2,7 +2,7 @@
 
 **Repository:** `gngaweb3/the-vault`
 **Files:** `scripts/snapshot.js` · `.github/workflows/snapshot.yml`
-**Version:** v1.1 · July 2026
+**Last updated:** July 5, 2026
 
 ---
 
@@ -20,8 +20,7 @@
 10. [Data Volume](#10-data-volume)
 11. [Security Overview](#11-security-overview)
 12. [Maintenance](#12-maintenance)
-13. [Changelog](#13-changelog)
-14. [Independent Verification](#14-independent-verification)
+13. [Independent Verification](#13-independent-verification)
 
 ---
 
@@ -29,7 +28,7 @@
 
 The Vault Snapshot System captures and stores hourly snapshots of The Vault's economic value. It is the data backbone that powers the Treasury Evolution Chart on the GNGA.WEB3 Protocol dashboard.
 
-The system runs fully autonomously every hour without human intervention, reading directly from the blockchain and storing verifiable on-chain data in Supabase. As of v1.1, the snapshot methodology is fully aligned with the live Vault Monitor Dashboard, including idle USDC held across Master Vaults and Sub-Vaults.
+The system runs fully autonomously every hour without human intervention, reading directly from the blockchain and storing verifiable on-chain data in Supabase. The snapshot methodology is fully aligned with the live Vault Monitor Dashboard, including idle USDC held across Master Vaults and Sub-Vaults.
 
 ---
 
@@ -134,7 +133,7 @@ base_assets_usd =
   usdc_master_usd
 
 yield_usd =
-  (stpol × pol_price) +
+  (stpol × spol_price) +
   (vxrp  × xrp_price) +
   usdc_sub_usd
 
@@ -173,9 +172,9 @@ The snapshot is designed to reflect the Vault's committed economic value — the
 | Category | Included in snapshot? | Rationale |
 |---|---|---|
 | Base Assets (Master Vault) | ✅ Yes | Core reserve holdings of the protocol |
-| Idle USDC — Master Vaults | ✅ Yes (as of v1.1) | Capital in transit before being deployed to a Sub-Vault or swapped into a base asset; economically part of the Vault |
+| Idle USDC — Master Vaults | ✅ Yes | Capital in transit before being deployed to a Sub-Vault or swapped into a base asset; economically part of the Vault |
 | Yield Positions (Sub-Vaults) | ✅ Yes | Active, yield-generating positions |
-| Idle USDC — Sub-Vaults | ✅ Yes (as of v1.1) | Capital in transit before being deployed into a yield position |
+| Idle USDC — Sub-Vaults | ✅ Yes | Capital in transit before being deployed into a yield position |
 | Gas reserves (ETH, BNB held for transaction fees) | ❌ No | Operational float, not treasury value |
 | Residual Assets (dust balances pending accumulation) | ❌ No | Below deployment threshold, not yet an active position |
 
@@ -200,7 +199,7 @@ CREATE INDEX idx_treasury_snapshots_captured_at
   ON treasury_snapshots (captured_at DESC);
 ```
 
-No schema changes were required for v1.1 — the USDC balances are absorbed into the existing `base_assets_usd` and `yield_usd` columns, consistent with how the Vault Monitor Dashboard reports them.
+No schema changes were required — the USDC balances are absorbed into the existing `base_assets_usd` and `yield_usd` columns, consistent with how the Vault Monitor Dashboard reports them.
 
 ### Row Level Security
 
@@ -314,18 +313,7 @@ Add the asset balance calculation in `scripts/snapshot.js` following the same pa
 
 ---
 
-## 13. Changelog
-
-| Version | Date | Change |
-|---|---|---|
-| v1.1 | July 2026 | Added idle USDC balances — Master Vaults (4 networks) into `base_assets_usd`, Sub-Vaults (4 networks) into `yield_usd`. Aligns snapshot methodology with Vault Monitor Dashboard v1.2. Historical rows prior to this version do not include USDC and are not retroactively adjusted. |
-| v1.0 | June 2026 | Initial release. Base Assets (PAXG, QNT, LINK, POL, WXRP, HYPE) and Yield Positions (stPOL, vXRP) only. |
-
-> **Note on historical continuity:** Because USDC was added in v1.1 without a schema change, the Treasury Evolution Chart will show a step increase in `base_assets_usd` and `yield_usd` at the point v1.1 began running, reflecting the newly captured USDC — not an actual change in Vault value. This is expected and does not indicate an error in prior data.
-
----
-
-## 14. Independent Verification
+## 13. Independent Verification
 
 All snapshot data can be independently verified:
 
@@ -338,4 +326,4 @@ Snapshot values must match the live Vault Monitor Dashboard values at the time o
 
 ---
 
-*GNGA.WEB3 Protocol — Vault Snapshot System v1.1 · July 2026*
+*GNGA.WEB3 Protocol — Vault Snapshot System*
