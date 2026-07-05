@@ -59,9 +59,9 @@ The dashboard reflects the current state of The Vault as defined in the GNGA.WEB
 | **PAXG** | PAX Gold (Tokenized Gold) | Ethereum | ERC-20 | `0x45804880De22913dAFE09f4980848ECE6EcbAf78` |
 | **QNT** | Quant Network | Ethereum | ERC-20 | `0x4a220E6096B25EADb88358cb44068A3248254675` |
 | **LINK** | Chainlink | Polygon | ERC-20 | `0x53E0bca35eC356BD5ddDFebbD1Fc0fD03FaBad39` |
-| **POL** | Polygon Ecosystem Token | Polygon | Native | 0x0000000000000000000000000000000000001010 |
+| **POL** | Polygon Ecosystem Token | Polygon | Native | `0x0000000000000000000000000000000000001010` |
 | **WXRP** | XRP Wrapped (BEP-20) | BNB Chain | ERC-20 | `0x1D2F0da169ceB9fC7B3144628dB156f3F6c60dBE` |
-| **HYPE** | Hyperliquid | HyperEVM | Native | 0x0d01dc56dcaaca66ad901c959b4011ec |
+| **HYPE** | Hyperliquid | HyperEVM | Native | `0x0d01dc56dcaaca66ad901c959b4011ec` |
 
 ### Ecosystem Value Positions
 
