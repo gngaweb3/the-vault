@@ -3,7 +3,7 @@
 **Repository:** `gngaweb3/the-vault`
 **File:** `TreasuryDashboard_v1_2.tsx`
 **Platform:** Framer Code Component
-**Version:** v1.2 · July 2026
+**Version:** v1.0 · July 2026
 
 ---
 
@@ -32,7 +32,7 @@
 
 The Vault Monitor Dashboard is a real-time monitoring interface for The Vault of the GNGA.WEB3 Protocol. It reads all asset balances directly from the blockchain on every page load — no intermediaries, no databases, no manually entered data.
 
-The dashboard reflects the current state of The Vault as defined in the GNGA.WEB3 Whitepaper: a multi-network, programmatic value container holding a basket of zero-derivative, on-chain verifiable assets. As of v1.2, the dashboard also accounts for idle USDC held in Master and Sub-Vaults — capital in transit between deposit and its final destination (a base asset swap or a yield position) — closing a gap where this capital was technically part of the Vault but was not yet reflected in the displayed totals.
+The dashboard reflects the current state of The Vault as defined in the GNGA.WEB3 Whitepaper: a multi-network, programmatic value container holding a basket of zero-derivative, on-chain verifiable assets. The dashboard accounts for idle USDC held in Master and Sub-Vaults — capital in transit between deposit and its final destination (a base asset swap or a yield position) — closing a gap where this capital was technically part of the Vault but was not yet reflected in the displayed totals.
 
 ---
 
@@ -81,7 +81,7 @@ USDC entering the Vault does not always map to a fixed asset or a yield position
 1. **Master Vault path:** USDC is deposited into a Master Vault and awaits conversion (swap) into a Base Asset (PAXG, QNT, LINK, POL, WXRP, HYPE).
 2. **Sub-Vault path:** USDC is routed to the Sub-Vault corresponding to a yield strategy and awaits deployment into that strategy (e.g. staking, lending).
 
-During this window, the USDC is neither a "position" in the traditional sense nor idle capital outside the protocol — it is committed Vault capital in transit. Starting in v1.2, this balance is read directly on-chain and included in the dashboard's totals:
+During this window, the USDC is neither a "position" in the traditional sense nor idle capital outside the protocol — it is committed Vault capital in transit. This balance is read directly on-chain and included in the dashboard's totals:
 
 | USDC Location | Counted toward | Contract per network |
 |---|---|---|
@@ -155,7 +155,7 @@ Base Assets USD =
   USDC Master Vaults USD
 
 Yield Positions USD =
-  (stPOL_balance × POL_price) +
+  (stPOL_balance × sPOL_price) +
   (vXRP_underlying × XRP_price) +
   USDC Sub-Vaults USD
 
@@ -174,9 +174,9 @@ To keep `Total Vault Value` an accurate representation of committed protocol cap
 | Category | Included in Total Vault Value? | Where it's shown |
 |---|---|---|
 | Base Assets (Master Vault) | ✅ Yes | `Base Assets` section |
-| Idle USDC — Master Vaults | ✅ Yes (as of v1.2) | `Base Assets` section |
+| Idle USDC — Master Vaults | ✅ Yes | `Base Assets` section |
 | Yield Positions (Sub-Vaults) | ✅ Yes | `Ecosystem Value Positions` section |
-| Idle USDC — Sub-Vaults | ✅ Yes (as of v1.2) | `Ecosystem Value Positions` section |
+| Idle USDC — Sub-Vaults | ✅ Yes | `Ecosystem Value Positions` section |
 | Gas reserves (ETH, BNB) | ❌ No | `Gas — Master/Sub-Vaults` section, informational only |
 | Residual Assets (dust balances) | ❌ No | `Residual Assets` section, informational only |
 
@@ -192,13 +192,13 @@ POL deposited into the Polygon liquid staking protocol on Ethereum. The protocol
 
 **Balance reading:** `sPOL.balanceOf(subEthereum)` — returns raw sPOL shares
 **Displayed as:** sPOL token balance (e.g. `36.754464 sPOL`)
-**Value calculated as:** `sPOL_balance × POL_price`
+**Value calculated as:** `sPOL_balance × sPOL_price`
 
 **Value Generated formula:**
 ```
-(36.754464 × POL_price) − (37 × POL_price)
+(36.754464 × sPOL_price) − (37 × POL_price)
 ```
-This reflects the difference in USD between the current sPOL position and the original 37 POL deposited, both valued at today's POL price. The result may be negative in the short term due to the liquid staking exchange rate mechanics — it turns positive as rewards accumulate and the exchange rate rises above 1:1.
+This reflects the difference in USD between the current sPOL position valued at sPOL's market price and the original 37 POL deposited valued at POL's market price. The result may be negative in the short term since sPOL trades at a slight discount to POL — it turns positive as staking rewards accumulate and the exchange rate rises.
 
 **Original deposit:** `37 POL` — confirmed on-chain at block `25,303,175` (Ethereum, Jun 12 2026)
 
@@ -261,7 +261,8 @@ GET https://api.coingecko.com/api/v3/simple/price?ids={ids}&vs_currencies=usd
 | PAXG | `pax-gold` |
 | QNT | `quant-network` |
 | LINK | `chainlink` |
-| POL / stPOL | `polygon-ecosystem-token` |
+| POL | `polygon-ecosystem-token` |
+| sPOL (stPOL) | `spol` |
 | WXRP / vXRP | `ripple` |
 | HYPE | `hyperliquid` |
 | USDC | `usd-coin` (fixed at $1.00 in calculations) |
@@ -346,8 +347,8 @@ Also add the same asset to `scripts/snapshot.js` in this repository so it is inc
 
 | Version | Date | Change |
 |---|---|---|
-| v1.2 | July 2026 | Added idle USDC tracking across the 4 Master Vaults (into `Base Assets`) and the 4 Sub-Vaults (into `Ecosystem Value Positions`). Added `Residual Assets` and `Gas — Master/Sub-Vaults` sections, explicitly excluded from `Total Vault Value`. |
-| v1.1 | June 2026 | Multichain expansion — HyperEVM support, HYPE base asset. |
+| v1.0 | July 2026 | Added idle USDC tracking across the 4 Master Vaults (into `Base Assets`) and the 4 Sub-Vaults (into `Ecosystem Value Positions`). Added `Residual Assets` and `Gas — Master/Sub-Vaults` sections, explicitly excluded from `Total Vault Value`. |
+
 
 ---
 
@@ -374,4 +375,4 @@ Every value displayed in the dashboard can be independently verified:
 
 ---
 
-*GNGA.WEB3 Protocol — Vault Monitor Dashboard v1.2 · July 2026*
+*GNGA.WEB3 Protocol — Vault Monitor Dashboard v1.0 · July 2026*
