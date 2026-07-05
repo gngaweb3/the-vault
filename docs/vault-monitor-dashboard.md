@@ -1,8 +1,6 @@
 # Vault Monitor Dashboard
 
 **Repository:** `gngaweb3/the-vault`
-**File:** `TreasuryDashboard_v1_2.tsx`
-**Platform:** Framer Code Component
 **Version:** v1.0 · July 2026
 
 ---
@@ -61,9 +59,9 @@ The dashboard reflects the current state of The Vault as defined in the GNGA.WEB
 | **PAXG** | PAX Gold (Tokenized Gold) | Ethereum | ERC-20 | `0x45804880De22913dAFE09f4980848ECE6EcbAf78` |
 | **QNT** | Quant Network | Ethereum | ERC-20 | `0x4a220E6096B25EADb88358cb44068A3248254675` |
 | **LINK** | Chainlink | Polygon | ERC-20 | `0x53E0bca35eC356BD5ddDFebbD1Fc0fD03FaBad39` |
-| **POL** | Polygon Ecosystem Token | Polygon | Native | — |
+| **POL** | Polygon Ecosystem Token | Polygon | Native | 0x0000000000000000000000000000000000001010 |
 | **WXRP** | XRP Wrapped (BEP-20) | BNB Chain | ERC-20 | `0x1D2F0da169ceB9fC7B3144628dB156f3F6c60dBE` |
-| **HYPE** | Hyperliquid | HyperEVM | Native | — |
+| **HYPE** | Hyperliquid | HyperEVM | Native | 0x0d01dc56dcaaca66ad901c959b4011ec |
 
 ### Ecosystem Value Positions
 
@@ -160,7 +158,8 @@ Yield Positions USD =
   USDC Sub-Vaults USD
 
 Value Generated (per position) =
-  (current_balance × current_price) − (original_deposit × current_price)
+  For stPOL: (sPOL_balance × sPOL_price) − (original_POL_deposit × POL_price)
+  For vXRP:  (vXRP_underlying × XRP_price) − (original_XRP_deposit × XRP_price)
 ```
 
 Balances are read directly from the blockchain using `balanceOf()` for ERC-20 tokens (including USDC) and `getBalance()` for native assets.
@@ -275,7 +274,6 @@ GET https://api.coingecko.com/api/v3/simple/price?ids={ids}&vs_currencies=usd
 |---|---|---|
 | `ethers.js` | 5.7.2 | Blockchain reads, unit formatting, BigNumber arithmetic |
 | `chart.js` | 4.4.0 | Vault composition donut chart |
-| `framer` | built-in | Property controls, canvas integration |
 
 Imported directly from CDN — no installation required:
 
