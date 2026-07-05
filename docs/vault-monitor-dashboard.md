@@ -1,7 +1,7 @@
 # Vault Monitor Dashboard
 
 **Repository:** `gngaweb3/the-vault`
-**Version:** v1.0 · July 2026
+**Last updated:** July 5, 2026
 
 ---
 
@@ -21,8 +21,7 @@
 12. [Technical Dependencies](#12-technical-dependencies)
 13. [Adding a New Base Asset](#13-adding-a-new-base-asset)
 14. [Adding a New Yield Position](#14-adding-a-new-yield-position)
-15. [Changelog](#15-changelog)
-16. [Independent Verification](#16-independent-verification)
+15. [Independent Verification](#15-independent-verification)
 
 ---
 
@@ -30,7 +29,7 @@
 
 The Vault Monitor Dashboard is a real-time monitoring interface for The Vault of the GNGA.WEB3 Protocol. It reads all asset balances directly from the blockchain on every page load — no intermediaries, no databases, no manually entered data.
 
-The dashboard reflects the current state of The Vault as defined in the GNGA.WEB3 Whitepaper: a multi-network, programmatic value container holding a basket of zero-derivative, on-chain verifiable assets. The dashboard accounts for idle USDC held in Master and Sub-Vaults — capital in transit between deposit and its final destination (a base asset swap or a yield position) — closing a gap where this capital was technically part of the Vault but was not yet reflected in the displayed totals.
+The dashboard reflects the current state of The Vault as defined in the GNGA.WEB3 Whitepaper: a multi-network, programmatic value container holding a basket of zero-derivative, on-chain verifiable assets. This includes idle USDC held in Master and Sub-Vaults — capital in transit between deposit and its final destination (a base asset swap or a yield position) — since it is committed Vault capital, not yet a base asset or yield position.
 
 ---
 
@@ -341,16 +340,7 @@ Also add the same asset to `scripts/snapshot.js` in this repository so it is inc
 
 ---
 
-## 15. Changelog
-
-| Version | Date | Change |
-|---|---|---|
-| v1.0 | July 2026 | Added idle USDC tracking across the 4 Master Vaults (into `Base Assets`) and the 4 Sub-Vaults (into `Ecosystem Value Positions`). Added `Residual Assets` and `Gas — Master/Sub-Vaults` sections, explicitly excluded from `Total Vault Value`. |
-
-
----
-
-## 16. Independent Verification
+## 15. Independent Verification
 
 Every value displayed in the dashboard can be independently verified:
 
@@ -373,4 +363,4 @@ Every value displayed in the dashboard can be independently verified:
 
 ---
 
-*GNGA.WEB3 Protocol — Vault Monitor Dashboard v1.0 · July 2026*
+*GNGA.WEB3 Protocol — Vault Monitor Dashboard*
