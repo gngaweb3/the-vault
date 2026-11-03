@@ -34,21 +34,35 @@ async function balanceERC20(contract, address, decimals = 18) {
 }
 
 async function main() {
-  // 1. Precios CoinGecko
+  // 1. Precios CoinGecko (con reintentos; nunca se guarda un snapshot con precios faltantes)
   const ids = "pax-gold,quant-network,chainlink,polygon-ecosystem-token,spol,ripple,hyperliquid";
-  const prices = await fetch(
-    "https://api.coingecko.com/api/v3/simple/price?ids=" + ids + "&vs_currencies=usd"
-  ).then(r => r.json());
-
-  const p = {
-    paxg: prices["pax-gold"]?.usd || 0,
-    qnt:  prices["quant-network"]?.usd || 0,
-    link: prices["chainlink"]?.usd || 0,
-    pol:  prices["polygon-ecosystem-token"]?.usd || 0,
-    spol: prices["spol"]?.usd || 0,
-    xrp:  prices["ripple"]?.usd || 0,
-    hype: prices["hyperliquid"]?.usd || 0,
+  const MAP = {
+    paxg: "pax-gold", qnt: "quant-network", link: "chainlink",
+    pol: "polygon-ecosystem-token", spol: "spol", xrp: "ripple", hype: "hyperliquid",
   };
+  let p = null;
+  for (let intento = 1; intento <= 4 && !p; intento++) {
+    try {
+      const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=" + ids + "&vs_currencies=usd");
+      if (!res.ok) throw new Error("CoinGecko HTTP " + res.status);
+      const prices = await res.json();
+      const candidato = {};
+      const faltan = [];
+      for (const [k, id] of Object.entries(MAP)) {
+        const v = prices[id]?.usd;
+        if (typeof v === "number" && v > 0) candidato[k] = v; else faltan.push(id);
+      }
+      if (faltan.length) throw new Error("Precios faltantes o en 0: " + faltan.join(", "));
+      p = candidato;
+    } catch (e) {
+      console.error("Intento " + intento + "/4 falló:", e.message);
+      if (intento < 4) await new Promise(r => setTimeout(r, 15000 * intento));
+    }
+  }
+  if (!p) {
+    console.error("Sin precios válidos: NO se guarda snapshot (evita puntos falsos en la gráfica).");
+    process.exit(1);
+  }
 
   // 2. Providers
   const ethProvider  = new ethers.providers.JsonRpcProvider(ETH_RPC);
@@ -139,6 +153,12 @@ async function main() {
   console.log("Total USD:", treasury_total_usd);
   console.log("USDC Master Vaults:", usdc_master);
   console.log("USDC Sub-Vaults:", usdc_sub);
+
+  // Validación final: un total absurdo no se guarda
+  if (!(treasury_total_usd > 0) || !(base_assets_usd > 0)) {
+    console.error("Totales inválidos, no se guarda snapshot.");
+    process.exit(1);
+  }
 
   // 7. Guardar en Supabase
   const res = await fetch(process.env.SUPABASE_URL + "/rest/v1/treasury_snapshots", {
