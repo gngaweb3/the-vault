@@ -78,7 +78,7 @@ Every hour, cron-job.org sends an HTTP POST to the GitHub Actions API, which tri
 1. Fetches real-time prices from CoinGecko for all Vault assets, including USDC.
 2. Reads on-chain balances from all Safe wallets across 4 networks using public RPCs — Master Vault and all 4 Sub-Vaults.
 3. Calculates `base_assets_usd`, `yield_usd`, and `treasury_total_usd`.
-4. Inserts a new row into the `treasury_snapshots` table in Supabase.
+4. Validates that `base_assets_usd` and `treasury_total_usd` are greater than 0, then inserts a new row into the `treasury_snapshots` table in Supabase. A snapshot with missing prices (price 0) is never stored.
 
 The calculation logic is identical in scope to the live Vault Monitor Dashboard, ensuring full consistency between real-time and historical data.
 
@@ -301,7 +301,7 @@ The system is fully autonomous. No manual intervention required under normal con
 |---|---|
 | Chart shows no new data points | Check cron-job.org execution history and GitHub Actions logs |
 | GitHub Actions workflow failing | Review logs in the Actions tab of this repository |
-| CoinGecko rate limit error | Script will fail that snapshot and resume automatically next hour |
+| CoinGecko rate limit error or missing price | Script retries up to 4 times (waits of 15, 30 and 45 s). If it still has no valid price for every asset, it exits with an error and **does not insert a row**, so that hour has no data point and the Actions run is marked failed. It resumes automatically next hour |
 | Public RPC temporarily down | Script retries next hour — public RPCs have high uptime |
 | Personal Access Token expired | Generate new token with `workflow` scope, update in cron-job.org |
 | New yield position added | Update `scripts/snapshot.js` to include the new position in `yield_usd` |
